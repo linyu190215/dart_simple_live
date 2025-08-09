@@ -1,0 +1,50 @@
+name: app-build-action-dev
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'dev'
+jobs:
+  # 只打包安卓手机应用
+  build-android:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      # 签出代码
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+      # 设置JAVA环境
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: "17"
+          cache: "gradle"
+      # 设置Flutter
+      - name: Flutter action
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.x'
+          cache: true       
+      # 更新Flutter的packages
+      - name: Restore packages
+        run: |
+          cd simple_live_app
+          flutter pub get
+      # 打包APK
+      - name: Build APK
+        run: |
+          cd simple_live_app
+          flutter build apk --debug --split-per-abi
+      #上传Artifacts
+      - name: Upload APK to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: |
+            simple_live_app/build/app/outputs/flutter-apk/app-armeabi-v7a-debug.apk
+            simple_live_app/build/app/outputs/flutter-apk/app-arm64-v8a-debug.apk
+            simple_live_app/build/app/outputs/flutter-apk/app-x86_64-debug.apk
+      #完成
+      - run: echo "🍏 This job's status is ${{ job.status }}."
