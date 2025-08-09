@@ -15,10 +15,6 @@ jobs:
       contents: write
 
     steps:
-      # 新增：配置Git代理（关键步骤）
-      - name: Set Git Proxy
-        run: |
-          git config --global url."https://ghproxy.com/https://github.com/".insteadOf "https://github.com/"
       # 签出代码
       - uses: actions/checkout@v4
         with:
